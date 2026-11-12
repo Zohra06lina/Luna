@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لونا 🌸</title>
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;font-family:Arial;background:#fff0f6;
+color:#63384e;min-height:100vh;
+display:flex;justify-content:center;align-items:center;
+}
+.app{
+width:100%;max-width:450px;height:100vh;
+background:#fff8fb;padding:20px;
+display:flex;flex-direction:column;
+}
+header{text-align:center;padding:18px}
+.flower{font-size:48px}
+h1{color:#d65b91;margin:8px}
+header p{color:#a87991}
+#chat{
+flex:1;overflow-y:auto;padding:12px;
+}
+.msg{padding:12px 16px;border-radius:18px;
+margin:10px 0;max-width:85%;line-height:1.6}
+.bot{background:#f9dce9;margin-left:auto}
+.user{background:#e9d5f5;margin-right:auto}
+.controls{display:flex;gap:8px}
+input{
+flex:1;min-width:0;border:1px solid #efb7d0;
+border-radius:25px;padding:14px;outline:none;
+}
+button{
+border:0;border-radius:25px;padding:12px;
+background:#df78a7;color:white;font-size:17px;
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<div class="flower">🌸</div>
+<h1>لونا</h1>
+<p>مساعدتك الشخصية الذكية 💗</p>
+</header>
+<div id="chat">
+<div class="msg bot">مرحباً! أنا لونا، كيف نقدر نعاونك اليوم؟ 🌷</div>
+</div>
+<div class="controls">
+<input id="message" placeholder="احكي مع لونا...">
+<button onclick="send()">إرسال</button>
+<button onclick="speak()">🎙️</button>
+</div>
+</div>
+<script>
+async function send(){
+const input=document.getElementById("message");
+const msg=input.value.trim();
+if(!msg)return;
+add(msg,"user");
+input.value="";
+try{
+const r=await fetch("/chat",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({message:msg})
+});
+const data=await r.json();
+add(data.reply||data.error,"bot");
+}catch(e){add("تعذر الاتصال، حاولي مرة أخرى.","bot")}
+}
+function add(text,type){
+const d=document.createElement("div");
+d.className="msg "+type;
+d.textContent=text;
+const chat=document.getElementById("chat");
+chat.appendChild(d);
+chat.scrollTop=chat.scrollHeight;
+}
+function speak(){
+if(!("webkitSpeechRecognition" in window)){
+add("خاصية الاستماع غير مدعومة في هذا المتصفح.","bot");
+return;
+}
+const rec=new webkitSpeechRecognition();
+rec.lang="ar-DZ";
+rec.onresult=e=>{
+document.getElementById("message").value=e.results[0][0].transcript;
+send();
+};
+rec.start();
+}
+</script>
+</body>
+</html>
